@@ -1,0 +1,237 @@
+.startup-portal {
+  min-height: calc(100vh - 80px);
+  padding: 3rem 2rem;
+  background: radial-gradient(circle at bottom left, var(--bg-color-secondary) 0%, var(--bg-color) 100%);
+}
+
+.portal-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+.portal-sidebar-info h1 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.portal-sidebar-info p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 3rem;
+}
+
+.portal-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: var(--text-secondary);
+  transition: all var(--transition-normal);
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.step-item.active {
+  filter: grayscale(0);
+  opacity: 1;
+  color: var(--text-primary);
+  transform: translateX(10px);
+}
+
+.step-item.completed {
+  filter: grayscale(0);
+  opacity: 1;
+  color: var(--success);
+}
+
+.step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.active .step-num {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: #fff;
+  box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.completed .step-num {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.portal-main-panel {
+  min-height: 500px;
+  padding: 2.5rem;
+}
+
+/* Form */
+.startup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.form-group input:focus, .form-group textarea:focus {
+  border-color: var(--accent-primary);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Evaluating */
+.portal-evaluating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  gap: 2rem;
+}
+
+.eval-ai-core {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-pulse {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--accent-glow);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0; }
+  100% { transform: scale(0.95); opacity: 0.5; }
+}
+
+/* Status View */
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.status-badge.safe { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.status-badge.risky { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.recommendations-box {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+}
+
+.recommendations-box h4 {
+  margin-bottom: 1rem;
+  color: var(--accent-primary);
+}
+
+.recommendations-box ul {
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.recommendations-box li {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.risk-indicator {
+  margin-bottom: 2rem;
+}
+
+.risk-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.risk-bar-bg {
+  height: 12px;
+  background: var(--bg-color-secondary);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.risk-bar {
+  height: 100%;
+  transition: width 1s ease-out;
+}

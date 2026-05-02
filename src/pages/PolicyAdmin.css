@@ -1,0 +1,27 @@
+.policy-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.policy-header h1 {
+  font-family: var(--font-display);
+}
+
+.admin-stats-grid .glass-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+}
+
+.admin-stats-grid .glass-panel:hover {
+  transform: translateY(-2px);
+  border-color: var(--glass-border-hover);
+}
+
+.policy-charts-grid .glass-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
