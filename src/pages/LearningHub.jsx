@@ -5,7 +5,7 @@ import { BookOpen, GraduationCap, Award, CheckCircle2, Play, ExternalLink, Shiel
 import { motion, AnimatePresence } from 'framer-motion';
 
 const LearningHub = () => {
-  const { userProfile, t, analyzeResume, addCertificate } = useAppContext();
+  const { userProfile, t, analyzeResume, addCertificate, roadmap } = useAppContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('courses');
   const [enrolledCourse, setEnrolledCourse] = useState(null);
@@ -14,12 +14,7 @@ const LearningHub = () => {
 
   const score = userProfile?.score || 0;
 
-  const courses = [
-    { id: 1, title: "Foundations of Digital Business", level: "Beginner", duration: "4h", scoreReq: 0, boost: 15 },
-    { id: 2, title: "E-Commerce Operations & UI", level: "Intermediate", duration: "10h", scoreReq: 40, boost: 20 },
-    { id: 3, title: "Advanced Startup Ecosystems", level: "Expert", duration: "15h", scoreReq: 75, boost: 25 },
-    { id: 4, title: "Smart Contracts for Micro-Finance", level: "Elite", duration: "20h", scoreReq: 90, boost: 30 }
-  ];
+  const courses = roadmap || [];
 
   const handleSimulateCompletion = (course) => {
     setCompletionProgress(0);
@@ -138,16 +133,16 @@ const LearningHub = () => {
                 </div>
                 <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>{course.title}</h3>
                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                  Boost your Market Readiness Index by **+{course.boost}%** upon completion.
+                  {course.provider} • {course.impact}
                 </div>
                 
                 {score >= course.scoreReq ? (
                   <button className="btn-primary full-width" onClick={() => handleSimulateCompletion(course)}>
-                    <Play size={16} /> Start Course
+                    <Play size={16} /> Start Module
                   </button>
                 ) : (
                   <button className="btn-secondary full-width" disabled style={{ cursor: 'not-allowed' }}>
-                    Locked (Req. {course.scoreReq}% Score)
+                    Locked (Skill Gap Detected)
                   </button>
                 )}
               </motion.div>

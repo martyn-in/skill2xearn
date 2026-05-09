@@ -270,3 +270,44 @@
 .full-width {
   width: 100%;
 }
+
+@media (max-width: 768px) {
+  .onboarding-page {
+    padding: 1rem;
+  }
+
+  .onboarding-card {
+    padding: 1.5rem;
+  }
+
+  .onboarding-card h1 {
+    font-size: 2rem;
+  }
+
+  .upload-zone {
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .result-header {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .rank-info {
+    text-align: center;
+  }
+
+  .rank-info h2 {
+    font-size: 2rem;
+  }
+
+  .skill-tags {
+    gap: 0.5rem;
+  }
+
+  .skill-tag-item {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+}

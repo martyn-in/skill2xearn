@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useConvexAuth } from "convex/react";
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, User, Rocket, Shield, RefreshCw } from 'lucide-react';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -12,85 +12,111 @@ import StartupRejection from './pages/StartupRejection';
 import LearningHub from './pages/LearningHub';
 import FundingPortal from './pages/FundingPortal';
 import PolicyAdmin from './pages/PolicyAdmin';
+import HiringAdmin from './pages/HiringAdmin';
 import CareerAssistant from './components/CareerAssistant';
 import LearningRoadmap from './components/LearningRoadmap';
 import MarketPulse from './pages/MarketPulse';
 import SkillIntelligence from './components/SkillIntelligence';
 import Auth from './pages/Auth';
+import GigManager from './pages/GigManager';
+import Matchmaker from './components/Matchmaker';
+import Leaderboard from './components/Leaderboard';
 import { AppProvider, useAppContext } from './context/AppContext';
 
 function Home() {
-  const { userProfile, setUserProfile, t } = useAppContext();
+  const { userProfile, setUserProfile, analyzeResume, t } = useAppContext();
   const navigate = useNavigate();
 
-  const handleRoleSelect = (role) => {
+  const handleRoleSelect = async (role) => {
+    if (role === 'admin') {
+      setUserProfile(prev => prev ? { ...prev, role, name: "System Admin" } : { role, name: "System Admin" });
+      navigate('/investor');
+      return;
+    }
+
     if (role === 'job_seeker') {
-      navigate('/onboarding');
-    } else if (role === 'founder') {
+      // Initialize a baseline profile so the dashboard isn't empty/zero
+      await analyzeResume("Digital Talent", "");
+      setUserProfile(prev => ({ ...prev, role }));
+      navigate('/dashboard');
+      return;
+    }
+
+    setUserProfile(prev => prev ? { ...prev, role } : { role });
+    if (role === 'founder') {
       navigate('/startup-portal');
-    } else if (role === 'admin') {
-      navigate('/admin');
     }
   };
 
   return (
-    <div className="home-container" style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      background: 'radial-gradient(circle at center, var(--bg-color-secondary) 0%, var(--bg-color) 100%)',
-      textAlign: 'center',
-      padding: '2rem'
-    }}>
-      <div className="hero-glow"></div>
+    <div className="hero-container">
+      <div className="hero-glow pulse-slow"></div>
+      
       <motion.div 
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 1, ease: [0.2, 0.8, 0.2, 1] }}
+        className="hero-content"
       >
-        <h1 style={{ fontSize: '4rem', marginBottom: '1rem', letterSpacing: '-0.05em' }}>
-          Skill2Earn <span className="text-gradient" style={{ fontWeight: 900 }}>X</span>
+        <div className="hero-badge-wrapper">
+          <span className="hero-badge">
+            Powered by Autonomous AI
+          </span>
+        </div>
+
+        <h1 className="hero-title">
+          Skill2Earn <span className="text-gradient">X</span>
         </h1>
-        <p style={{ fontSize: '1.4rem', color: 'var(--text-secondary)', margin: '0 auto 3rem auto', maxWidth: '600px', lineHeight: '1.6' }}>
-          The autonomous economic growth engine. Connecting digital talent, startups, and investors in a unified ecosystem.
+        
+        <p className="hero-subtitle">
+          The autonomous economic growth engine. Connecting digital talent, startups, and investors in a unified elite ecosystem.
         </p>
         
-        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn-primary" onClick={() => handleRoleSelect('job_seeker')} style={{ padding: '1.2rem 2.5rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <User size={24} /> I am a Job Seeker
+        <div className="hero-actions">
+          <button className="btn-primary hero-btn" onClick={() => handleRoleSelect('job_seeker')}>
+            <User size={22} /> I am a Job Seeker
           </button>
-          <button className="btn-secondary" onClick={() => handleRoleSelect('founder')} style={{ padding: '1.2rem 2.5rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', borderColor: 'var(--success)', color: 'var(--success)' }}>
-            <Rocket size={24} /> I am a Startup Founder
+          <button className="btn-secondary hero-btn" onClick={() => handleRoleSelect('founder')}>
+            <Rocket size={22} /> I am a Startup Founder
           </button>
         </div>
 
-        <div style={{ marginTop: '1.5rem' }}>
-          <p style={{ color: 'var(--text-tertiary)', fontSize: '0.9rem' }}>
-            Already have an account? <span onClick={() => navigate('/auth')} style={{ color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 600, textDecoration: 'underline' }}>Sign in here</span>
+        <div className="hero-secondary-actions animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <p style={{ color: 'var(--text-tertiary)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+            Returning member? <span onClick={() => navigate('/auth')} style={{ color: 'var(--accent-primary)', cursor: 'pointer', fontWeight: 600, textDecoration: 'underline' }}>Sign in to your portal</span>
           </p>
-        </div>
-
-        <div style={{ marginTop: '2.5rem' }}>
-          <button className="btn-secondary" onClick={() => handleRoleSelect('admin')} style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)', background: 'transparent' }}>
-            <Shield size={16} /> Admin Access Gate
+          
+          <button 
+            className="btn-secondary" 
+            onClick={() => handleRoleSelect('admin')} 
+            style={{ 
+              padding: '0.6rem 1.25rem', 
+              fontSize: '0.8rem', 
+              borderRadius: 'var(--radius-full)',
+              background: 'rgba(255,255,255,0.02)',
+              opacity: 0.7
+            }}
+          >
+            <Shield size={14} /> Admin Gate
           </button>
         </div>
 
-        <div className="home-features" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginTop: '5rem', maxWidth: '1000px' }}>
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h4 style={{ color: 'var(--accent-primary)', marginBottom: '0.5rem' }}>AI Analyzer</h4>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Market-mapping resume analysis engine.</p>
-          </div>
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h4 style={{ color: 'var(--success)', marginBottom: '0.5rem' }}>Startup Portal</h4>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Level 1 to 3 pitch evaluation & funding.</p>
-          </div>
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <h4 style={{ color: 'var(--accent-secondary)', marginBottom: '0.5rem' }}>Talent Radar</h4>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Elite matching for job-ready individuals.</p>
-          </div>
+        <div className="hero-features">
+          {[
+            { title: 'AI Analyzer', desc: 'Market-mapping resume analysis engine.', color: 'var(--accent-primary)' },
+            { title: 'Elite Talent', desc: 'Connecting top 1% talent with founders.', color: 'var(--success)' },
+            { title: 'Smart Funding', desc: 'AI-driven pitch evaluation & capital.', color: 'var(--accent-secondary)' }
+          ].map((feat, i) => (
+            <motion.div 
+              key={i} 
+              whileHover={{ y: -10 }}
+              className="glass-panel feature-card"
+            >
+              <div className="feature-line" style={{ background: feat.color }}></div>
+              <h4 className="feature-title">{feat.title}</h4>
+              <p className="feature-desc">{feat.desc}</p>
+            </motion.div>
+          ))}
         </div>
       </motion.div>
     </div>
@@ -99,6 +125,11 @@ function Home() {
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useConvexAuth();
+  const { userProfile } = useAppContext();
+  
+  if (userProfile?.role === 'admin' || userProfile?.role === 'viewer') {
+    return children;
+  }
   
   if (isLoading) {
     return (
@@ -113,31 +144,50 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+const PageWrapper = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    transition={{ duration: 0.3, ease: "easeOut" }}
+    style={{ height: '100%' }}
+  >
+    {children}
+  </motion.div>
+);
+
 function App() {
+  const location = useLocation();
+
   return (
     <AppProvider>
-      <Router>
-        <Routes>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
           
           <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/learning" element={<LearningHub />} />
-            <Route path="/startup-portal" element={<StartupPortal />} />
-            <Route path="/investor" element={<InvestorDashboard />} />
-            <Route path="/admin" element={<InvestorDashboard />} />
-            <Route path="/startup-rejection" element={<StartupRejection />} />
+            <Route path="/onboarding" element={<PageWrapper><Onboarding /></PageWrapper>} />
+            <Route path="/dashboard" element={<PageWrapper><Dashboard /></PageWrapper>} />
+            <Route path="/learning" element={<PageWrapper><LearningHub /></PageWrapper>} />
+            <Route path="/investor" element={<PageWrapper><InvestorDashboard /></PageWrapper>} />
             <Route path="/intelligence" element={<div className="glass-panel" style={{padding: '2rem'}}><SkillIntelligence /></div>} />
-            <Route path="/market-pulse" element={<MarketPulse />} />
-            <Route path="/roadmap" element={<LearningRoadmap />} />
+            <Route path="/market-pulse" element={<PageWrapper><MarketPulse /></PageWrapper>} />
+            <Route path="/roadmap" element={<PageWrapper><LearningRoadmap /></PageWrapper>} />
             <Route path="/funding" element={<FundingPortal />} />
             <Route path="/policy" element={<PolicyAdmin />} />
+            
+            {/* Newly secured routes */}
+            <Route path="/startup-portal" element={<PageWrapper><StartupPortal /></PageWrapper>} />
+            <Route path="/admin" element={<PageWrapper><HiringAdmin /></PageWrapper>} />
+            <Route path="/startup-rejection" element={<PageWrapper><StartupRejection /></PageWrapper>} />
+            <Route path="/matchmaker" element={<PageWrapper><div className="glass-panel" style={{padding: '3rem'}}><Matchmaker /></div></PageWrapper>} />
+            <Route path="/leaderboard" element={<PageWrapper><div className="glass-panel" style={{padding: '3rem'}}><Leaderboard /></div></PageWrapper>} />
+            <Route path="/gigs" element={<PageWrapper><GigManager /></PageWrapper>} />
           </Route>
         </Routes>
-        <CareerAssistant />
-      </Router>
+      </AnimatePresence>
+      <CareerAssistant />
     </AppProvider>
   );
 }

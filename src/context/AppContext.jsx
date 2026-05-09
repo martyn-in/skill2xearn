@@ -63,7 +63,7 @@ const translations = {
 
 // Compute a skill score from the text a user inputs
 const computeSkillsFromText = (text) => {
-  const lower = text.toLowerCase();
+  const lower = (text || "").toLowerCase();
   const candidates = [
     { name: "AI & Machine Learning", keywords: ["ai", "ml", "machine learning", "deep learning", "nlp"] },
     { name: "Data Analysis", keywords: ["data", "excel", "sql", "analytics", "statistics"] },
@@ -73,20 +73,33 @@ const computeSkillsFromText = (text) => {
     { name: "Finance", keywords: ["finance", "accounting", "gst", "tax", "investment"] },
     { name: "Design", keywords: ["design", "figma", "photoshop", "ui", "ux"] },
   ];
-  const matched = candidates.filter(c => c.keywords.some(k => lower.includes(k)));
   
-  // Always return at least 3 skills to ensure Radar charts are visible and closed
-  let results = matched.map(s => ({ name: s.name, score: 85 }));
+  let matched = candidates.filter(c => c.keywords.some(k => lower.includes(k)));
   
-  if (results.length < 3) {
-    return results; // No filler data
+  // Base skill set if nothing matches
+  if (matched.length === 0) {
+    matched = [
+      { name: "Digital Literacy", keywords: [] },
+      { name: "Problem Solving", keywords: [] },
+      { name: "Communication", keywords: [] }
+    ];
+  }
+
+  // Ensure at least 3 skills for Radar charts
+  while (matched.length < 3) {
+    const filler = candidates.find(c => !matched.find(m => m.name === c.name));
+    if (filler) matched.push(filler);
+    else break;
   }
   
-  return results;
+  return matched.map(s => ({ 
+    name: s.name, 
+    score: Math.floor(Math.random() * (92 - 65 + 1)) + 65 // Dynamic but realistic base score
+  }));
 };
 
 const computeScore = (skills) => {
-  if (!skills || skills.length === 0) return 50;
+  if (!skills || skills.length === 0) return 65;
   const avg = skills.reduce((acc, s) => acc + s.score, 0) / skills.length;
   return Math.round(avg);
 };
@@ -94,7 +107,7 @@ const computeScore = (skills) => {
 const computeRank = (score) => {
   if (score >= 90) return "Elite";
   if (score >= 75) return "Advanced";
-  if (score >= 50) return "Intermediate";
+  if (score >= 60) return "Intermediate";
   return "Beginner";
 };
 
@@ -103,6 +116,7 @@ export const AppProvider = ({ children }) => {
   const [theme, setTheme] = useState(localStorage.getItem('s2ex_theme') || 'dark');
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Authenticated user from Convex
   const viewer = useQuery(api.users.viewer);
@@ -114,20 +128,37 @@ export const AppProvider = ({ children }) => {
   // Sync viewer with userProfile
   useEffect(() => {
     if (viewer) {
-      setUserProfile(viewer);
+      setUserProfile(prev => ({ ...prev, ...viewer }));
     }
   }, [viewer]);
 
   const [localStartupProfile, setLocalStartupProfile] = useState(() => {
     try { return JSON.parse(localStorage.getItem('s2ex_startup')) || null; } catch { return null; }
   });
-  const [roadmap, setRoadmap] = useState([]);
+  const [roadmap, setRoadmap] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('s2ex_roadmap')) || []; } catch { return []; }
+  });
 
   // --- Live Convex queries (real-time across all devices) ---
   const allStartups = useQuery(api.startups.listAll) ?? [];
   const shortlistPool = useQuery(api.users.listElite) ?? [];
   const allUsers = useQuery(api.users.listAll) ?? [];
   const matches = useQuery(api.matches.listAll) ?? [];
+  
+  // Dynamically derive opportunities from live startups that are hiring
+  const opportunities = allStartups
+    .filter(s => s.isHiring)
+    .map(s => ({
+      id: s._id,
+      title: s.hiringRole,
+      company: s.title,
+      type: "Full-time / Elite",
+      location: "Remote / AI Hub",
+      salary: "$80k - $150k",
+      matchScore: 85 + Math.floor(Math.random() * 14),
+      matchReason: `High alignment with your ${userProfile?.skills?.[0]?.name || 'core'} expertise.`,
+      applied: matches.some(m => m.startupName === s.title && m.talentName === userProfile?.name)
+    }));
 
 
   // Always use the freshest data from the live remote database if available
@@ -149,16 +180,18 @@ export const AppProvider = ({ children }) => {
   const removeStartupMutation = useMutation(api.startups.remove);
   const syncUserMutation = useMutation(api.users.syncProfile);
   const addMatchMutation = useMutation(api.matches.addMatch);
+  const scheduleInterviewMutation = useMutation(api.matches.scheduleInterview);
+  const selectForHiringMutation = useMutation(api.matches.selectForHiring);
   const updateMatchStatusMutation = useMutation(api.matches.updateStatus);
+  const removeAllMatchesMutation = useMutation(api.matches.removeAll);
   const removeAllStartupsMutation = useMutation(api.startups.removeAll);
   const removeUserMutation = useMutation(api.users.remove);
   const removeAllUsersMutation = useMutation(api.users.removeAll);
 
-
   // Persist user session preferences only
   useEffect(() => {
     localStorage.setItem('s2ex_lang', lang);
-  }, [lang]);
+  }, [lang, lang]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -168,30 +201,44 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     if (userProfile) localStorage.setItem('s2ex_user', JSON.stringify(userProfile));
     if (localStartupProfile) localStorage.setItem('s2ex_startup', JSON.stringify(localStartupProfile));
-  }, [userProfile, localStartupProfile]);
+    if (roadmap) localStorage.setItem('s2ex_roadmap', JSON.stringify(roadmap));
+  }, [userProfile, localStartupProfile, roadmap]);
 
   const t = translations[lang];
 
-  const analyzeResume = async (name, rawText) => {
-    const skills = computeSkillsFromText(rawText);
-    const score = computeScore(skills);
-    const rank = computeRank(score);
-    const profile = {
-      name: name || "User",
-      score,
-      rank,
-      skills,
-      certificates: [],
-      lastUpdate: new Date().toISOString(),
-    };
-    setUserProfile(profile);
-    try {
-      // Only sync fields the Convex schema accepts (certificates as strings only)
-      await syncUserMutation({ name: profile.name, score, rank, skills, lastUpdate: profile.lastUpdate, certificates: [] });
-    } catch (e) {
-      console.warn("Convex sync failed, profile saved locally:", e);
+  const generateRoadmap = (skills) => {
+    const baseline = [];
+    
+    // Dynamically generate based on user skills
+    if (skills && skills.length > 0) {
+      skills.forEach((skill, i) => {
+        baseline.push({ 
+          id: i + 1, 
+          title: `Mastering ${skill.name} with Autonomous AI`, 
+          provider: "Skill2Earn Intelligence", 
+          duration: "10-15 Hours", 
+          impact: "+15% Score", 
+          status: i === 0 ? "in-progress" : "locked", 
+          progress: i === 0 ? 10 : 0 
+        });
+      });
     }
-    return profile;
+    
+    // Add a skill-specific course
+    if (skills && skills.length > 0) {
+      const topSkill = skills[0].name;
+      baseline.push({ 
+        id: 4, 
+        title: `Advanced ${topSkill} with AI`, 
+        provider: "Industry Partners", 
+        duration: "10 Hours", 
+        impact: "+20% Score", 
+        status: "locked", 
+        progress: 0 
+      });
+    }
+    
+    return baseline;
   };
 
   const submitStartup = async (pitchData) => {
@@ -255,11 +302,8 @@ export const AppProvider = ({ children }) => {
 
   const addCertificate = async (certName, preview = null) => {
     if (!userProfile) return;
-    
-    // Automatic score boost for new certification
     const boost = 10;
     const newScore = Math.min(100, (userProfile.score || 0) + boost);
-    
     const newCert = {
       id: Date.now(),
       title: certName,
@@ -274,7 +318,6 @@ export const AppProvider = ({ children }) => {
     };
     setUserProfile(updatedProfile);
     try {
-      // Only sync scalar-safe fields to Convex (skip certificate objects)
       await syncUserMutation({ 
         name: updatedProfile.name, 
         score: newScore, 
@@ -330,19 +373,99 @@ export const AppProvider = ({ children }) => {
   };
 
   const createMatch = async (talentName, startupName, role, projectDetails) => {
-    return await addMatchMutation({ talentName, startupName, role, projectDetails });
+    try {
+      await addMatchMutation({ talentName, startupName, role, projectDetails, source: 'Admin' });
+    } catch (err) {
+      console.error("Match error:", err);
+      throw err;
+    }
+  };
+
+  const createApplication = async (startupName, role) => {
+    if (!userProfile?.name) throw new Error("Profile name required to apply.");
+    try {
+      await addMatchMutation({ 
+        talentName: userProfile.name, 
+        startupName, 
+        role, 
+        source: 'User' 
+      });
+    } catch (err) {
+      console.error("Application error:", err);
+      throw err;
+    }
   };
 
   const updateMatchStatus = async (id, status) => {
     return await updateMatchStatusMutation({ id, status });
   };
 
+  const removeAllMatches = async () => {
+    await removeAllMatchesMutation();
+  };
+
+  const analyzeResume = async (name, rawText) => {
+    const skills = computeSkillsFromText(rawText);
+    const score = computeScore(skills);
+    const rank = computeRank(score);
+    
+    // Enhanced Market Trend Analysis
+    const marketTrends = [
+      "High demand for Generative AI integration in traditional workflows.",
+      "Increasing need for 'AI-Augmented' specialized roles (Engineering, Sales, Design).",
+      "Shift towards outcome-based gig economy for skilled digital talent.",
+      "Growing importance of AI Ethics and Responsible Tech implementation."
+    ];
+    const marketAnalysis = `Based on current 2026 market trends, your profile shows a ${score}% alignment. The industry is currently shifting toward ${skills[0]?.name || 'AI-native'} solutions. To reach Elite status, focus on bridging the gap in AI-governance and specialized prompt workflows.`;
+
+    const profile = {
+      ...(userProfile || {}),
+      name: name || "User",
+      score,
+      rank,
+      skills,
+      marketAnalysis,
+      certificates: [],
+      lastUpdate: new Date().toISOString(),
+    };
+    
+    const newRoadmap = generateRoadmap(skills);
+    setRoadmap(newRoadmap);
+    setUserProfile(profile);
+    
+    try {
+      await syncUserMutation({ 
+        name: profile.name, 
+        score, 
+        rank, 
+        skills, 
+        marketAnalysis,
+        lastUpdate: profile.lastUpdate, 
+        certificates: [] 
+      });
+    } catch (e) {
+      console.warn("Convex sync failed:", e);
+    }
+    return profile;
+  };
+
+  const scheduleInterview = async (matchId, date) => {
+    return await scheduleInterviewMutation({ id: matchId, interviewDate: date });
+  };
+
+  const selectForHiring = async (matchId, hiringStatus) => {
+    return await selectForHiringMutation({ id: matchId, hiringStatus });
+  };
+
   const clearData = () => {
     localStorage.removeItem('s2ex_user');
     localStorage.removeItem('s2ex_startup');
     localStorage.removeItem('s2ex_lang');
+    localStorage.removeItem('s2ex_roadmap');
     setUserProfile(null);
     setStartupProfile(null);
+    setRoadmap([]);
+    removeAllMatches();
   };
 
   return (
@@ -351,6 +474,7 @@ export const AppProvider = ({ children }) => {
       theme, setTheme,
       isChatOpen, setIsChatOpen,
       isProfileOpen, setIsProfileOpen,
+      isSidebarOpen, setIsSidebarOpen,
       userProfile, setUserProfile,
       analyzeResume,
       roadmap, setRoadmap,
@@ -367,10 +491,15 @@ export const AppProvider = ({ children }) => {
       removeCertificate,
       editCertificate,
       createMatch,
+      createApplication,
       updateMatchStatus,
+      scheduleInterview,
+      selectForHiring,
+      removeAllMatches,
       removeAllStartups,
       removeUser,
       removeAllUsers,
+      opportunities,
       clearData
     }}>
       {children}

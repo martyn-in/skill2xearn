@@ -22,6 +22,8 @@ export default defineSchema({
     certificates: v.optional(v.array(v.string())),
     lastUpdate: v.optional(v.string()),
     isElite: v.optional(v.boolean()),
+    marketAnalysis: v.optional(v.string()),
+    role: v.optional(v.string()), // 'admin', 'founder', 'viewer', etc.
   }).index("email", ["email"]),
   startups: defineTable({
     title: v.string(),
@@ -47,8 +49,10 @@ export default defineSchema({
     startupName: v.string(),
     role: v.string(),
     projectDetails: v.optional(v.string()),
-    status: v.optional(v.string()),
+    status: v.optional(v.string()), // 'Offered', 'Accepted', 'Interview', 'Hired', 'Rejected'
     date: v.string(),
+    interviewDate: v.optional(v.string()),
+    hiringStatus: v.optional(v.string()), // 'Selected', 'Waitlisted', 'Rejected'
+    source: v.optional(v.string()), // 'Admin' or 'User'
   }),
 });
-

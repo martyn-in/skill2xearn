@@ -1,0 +1,213 @@
+.matchmaker-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.matchmaker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.matchmaker-header h2 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.matchmaker-header p {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  margin: 0.25rem 0 0;
+}
+
+.match-score {
+  background: var(--accent-primary);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.card-stack {
+  position: relative;
+  height: 550px;
+  perspective: 1000px;
+}
+
+.match-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 0 !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 1) 100%);
+}
+
+.card-image {
+  height: 240px;
+  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 100%), #0f172a;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.image-placeholder {
+  opacity: 0.3;
+}
+
+.card-badge {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.card-info {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.card-info h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.location-tag {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.card-description {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 1rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat span {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+.stat strong {
+  font-size: 1rem;
+  color: var(--accent-primary);
+}
+
+.tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tech-tag {
+  background: rgba(255,255,255,0.05);
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.card-actions {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid var(--glass-border);
+}
+
+.swipe-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.swipe-btn.reject {
+  background: #ef444422;
+  color: #ef4444;
+  border: 1px solid #ef444444;
+}
+
+.swipe-btn.super {
+  width: 45px;
+  height: 45px;
+  background: #3b82f622;
+  color: #3b82f6;
+  border: 1px solid #3b82f644;
+}
+
+.swipe-btn.accept {
+  background: #10b98122;
+  color: #10b981;
+  border: 1px solid #10b98144;
+}
+
+.swipe-btn:hover {
+  transform: scale(1.15) translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.swipe-btn.reject:hover { background: #ef4444; color: white; }
+.swipe-btn.super:hover { background: #3b82f6; color: white; }
+.swipe-btn.accept:hover { background: #10b981; color: white; }
+
+.matchmaker-empty {
+  height: 550px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.5rem;
+  padding: 3rem;
+}
+
+.matchmaker-empty h3 { margin: 0; font-size: 1.5rem; }
+.matchmaker-empty p { color: var(--text-tertiary); margin: 0; }

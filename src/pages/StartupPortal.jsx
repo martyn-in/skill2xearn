@@ -19,6 +19,8 @@ const StartupPortal = () => {
     hiringPositions: ''
   });
   const [evalProgress, setEvalProgress] = useState(0);
+  const [showPitchArchitect, setShowPitchArchitect] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -78,6 +80,15 @@ const StartupPortal = () => {
               <div className="step-num">3</div>
               <span>Investor Review</span>
             </div>
+          </div>
+
+          <div className="portal-helper glass-panel" style={{ marginTop: '2rem', padding: '1.5rem' }}>
+            <Lightbulb size={24} className="text-gradient" style={{ marginBottom: '1rem' }} />
+            <h4>Need Help?</h4>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>Use our AI architect to structure your pitch for maximum impact.</p>
+            <button className="btn-secondary full-width" onClick={() => setShowPitchArchitect(true)}>
+              Launch Pitch Architect
+            </button>
           </div>
         </div>
 
@@ -277,6 +288,56 @@ const StartupPortal = () => {
           </AnimatePresence>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showPitchArchitect && (
+          <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <motion.div 
+              className="glass-panel" 
+              style={{ width: '600px', padding: '3rem', position: 'relative' }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+            >
+              <h2 className="text-gradient">Smart Pitch Architect</h2>
+              <p style={{ color: 'var(--text-tertiary)', marginBottom: '2rem' }}>Our AI will help you structure your vision for investors.</p>
+              
+              <div className="architect-flow">
+                <div className="form-group">
+                  <label>Briefly describe your idea</label>
+                  <textarea 
+                    rows="4" 
+                    placeholder="Enter a raw description of what you're building..."
+                    onChange={(e) => {
+                      if (e.target.value.length > 50) {
+                        setAiSuggestions("AI Suggestion: Focus on the 'Autonomous Execution' aspect. Investors in 2026 are highly interested in self-scaling systems.");
+                      }
+                    }}
+                  ></textarea>
+                </div>
+
+                {aiSuggestions && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--accent-primary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}
+                  >
+                    {aiSuggestions}
+                  </motion.div>
+                )}
+
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button className="btn-primary" style={{ flex: 1 }} onClick={() => setShowPitchArchitect(false)}>
+                    Generate Structure
+                  </button>
+                  <button className="btn-secondary" onClick={() => setShowPitchArchitect(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

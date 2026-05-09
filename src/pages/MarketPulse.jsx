@@ -1,25 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
-import { TrendingUp, BookOpen, Brain, Globe, Zap, ArrowUpRight, X } from 'lucide-react';
+import { TrendingUp, BookOpen, Brain, Globe, Zap, ArrowUpRight, X, RefreshCw, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '../context/AppContext';
-
-const aiTrendData = [
-  { year: '2024', genAI: 140, conventional: 75 },
-  { year: '2025', genAI: 210, conventional: 80 },
-  { year: '2026', genAI: 320, conventional: 85 },
-];
-
-const sectorImpact = [
-  { sector: 'Finance', impact: 85, color: '#3b82f6' },
-  { sector: 'Education', impact: 92, color: '#a855f7' },
-  { sector: 'Healthcare', impact: 78, color: '#10b981' },
-  { sector: 'Retail', impact: 65, color: '#f59e0b' },
-];
+import { useAction } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 const MarketPulse = () => {
   const { t } = useAppContext();
   const [selectedAnalysis, setSelectedAnalysis] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState("Just now");
+  
+  const fetchTrends = useAction(api.market.fetchRealtimeTrends);
+
+  const [aiTrendData, setAiTrendData] = useState([
+    { year: '2024 (Q1)', genAI: 140, conventional: 75 },
+    { year: '2025 (Est)', genAI: 210, conventional: 80 },
+    { year: '2026 (Est)', genAI: 320, conventional: 85 },
+  ]);
+
+  const [sectorImpact, setSectorImpact] = useState([
+    { sector: 'Finance', impact: 85, color: '#3b82f6' },
+    { sector: 'Education', impact: 92, color: '#a855f7' },
+    { sector: 'Healthcare', impact: 78, color: '#10b981' },
+    { sector: 'Retail', impact: 65, color: '#f59e0b' },
+  ]);
+
+  const [liveNews, setLiveNews] = useState([]);
+
+  const updateMarketData = async () => {
+    setIsUpdating(true);
+    try {
+      const data = await fetchTrends();
+      if (data.success) {
+        const currentYear = new Date().getFullYear();
+        
+        // Update charts with live dynamic data based on HackerNews API
+        setAiTrendData([
+          { year: '2024 (Historical)', genAI: 140, conventional: 75 },
+          { year: 'Current (Live)', genAI: data.metrics.currentAIIndex, conventional: 78 },
+          { year: 'Next Year (Proj)', genAI: data.metrics.currentAIIndex * 1.4, conventional: 82 },
+        ]);
+
+        setSectorImpact([
+          { sector: 'Finance & Crypto', impact: Math.min(100, data.metrics.financeImpact), color: '#3b82f6' },
+          { sector: 'Tech & SaaS', impact: Math.min(100, data.metrics.techImpact), color: '#a855f7' },
+          { sector: 'Healthcare', impact: 78, color: '#10b981' }, // Static baseline
+          { sector: 'Retail', impact: 65, color: '#f59e0b' }, // Static baseline
+        ]);
+
+        if (data.recentAiNews) {
+          setLiveNews(data.recentAiNews);
+        }
+        
+        setLastUpdated(new Date().toLocaleTimeString());
+      }
+    } catch (e) {
+      console.error("Failed to fetch live trends", e);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch data immediately on mount
+    updateMarketData();
+    
+    // Auto-refresh every 5 minutes
+    const interval = setInterval(updateMarketData, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const analysisContent = {
     finance: {
@@ -38,23 +89,45 @@ const MarketPulse = () => {
 
   return (
     <div className="market-pulse-page animate-fade-in" style={{ padding: '2rem' }}>
-      <div className="page-header" style={{ marginBottom: '2.5rem' }}>
-        <h1 className="text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '2.5rem' }}>
-          <Globe size={40} /> {t.analytics || "Market Pulse"}
-        </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Global AI Adoption Research & Regional Economic Analysis (2024-2026)</p>
+      <div className="page-header" style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 className="text-gradient" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '2.5rem' }}>
+            <Globe size={40} /> {t.analytics || "Market Pulse"}
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Live API Feed & Regional Economic Analysis</p>
+        </div>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+          <button 
+            onClick={updateMarketData} 
+            disabled={isUpdating}
+            className="btn-secondary" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+          >
+            <RefreshCw size={16} className={isUpdating ? "spin" : ""} />
+            {isUpdating ? "Syncing API..." : "Live Sync"}
+          </button>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Last updated: {lastUpdated}</span>
+        </div>
       </div>
 
       <div className="pulse-grid" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
         {/* Main Trends Chart */}
-        <div className="glass-panel" style={{ padding: '2rem' }}>
+        <div className="glass-panel" style={{ padding: '2rem', position: 'relative' }}>
+          {isUpdating && (
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px' }}>
+               <Activity size={32} className="text-gradient pulse-slow" />
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
             <div>
-              <h3 style={{ margin: 0 }}>Generative AI Growth Trajectory</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Market capitalization index (2024-2026 forecast)</p>
+              <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                Generative AI Growth Trajectory <span className="status-indicator online"></span>
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Live market capitalization index</p>
             </div>
             <div className="trending-badge" style={{ padding: '0.5rem 1rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600 }}>
-               <TrendingUp size={14} style={{ marginRight: '4px' }} /> +320% Target
+               <TrendingUp size={14} style={{ marginRight: '4px' }} /> Dynamic Target
             </div>
           </div>
 
@@ -97,12 +170,14 @@ const MarketPulse = () => {
 
         {/* Sector Impact */}
         <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3 style={{ marginBottom: '1.5rem' }}>Impact by Sector</h3>
+          <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+             Impact by Sector <Activity size={16} className="text-gradient" />
+          </h3>
           <div style={{ height: '300px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sectorImpact} layout="vertical">
                 <XAxis type="number" hide />
-                <YAxis dataKey="sector" type="category" stroke="var(--text-secondary)" width={100} fontSize={12} />
+                <YAxis dataKey="sector" type="category" stroke="var(--text-secondary)" width={110} fontSize={11} />
                 <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '8px', color: 'var(--text-primary)' }} />
                 <Bar dataKey="impact" radius={[0, 4, 4, 0]} name="Automation Potential %">
                   {sectorImpact.map((entry, index) => (
@@ -114,6 +189,25 @@ const MarketPulse = () => {
           </div>
         </div>
       </div>
+
+      {liveNews.length > 0 && (
+        <div style={{ marginBottom: '3rem' }}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <Activity className="text-gradient pulse-slow" /> Real-Time Live Feed
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {liveNews.map((news, i) => (
+              <a key={i} href={news.url} target="_blank" rel="noopener noreferrer" className="glass-panel" style={{ padding: '1.25rem', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--accent-primary)', transition: 'transform 0.2s' }}>
+                <div>
+                  <h4 style={{ color: 'var(--text-primary)', margin: 0, fontSize: '1.05rem' }}>{news.title}</h4>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem', display: 'block' }}>Hacker News API Feed • Fetched Live</span>
+                </div>
+                <ArrowUpRight size={18} style={{ color: 'var(--text-secondary)' }} />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       <h2 style={{ margin: '3rem 0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <BookOpen className="text-gradient" /> AI Knowledge Center

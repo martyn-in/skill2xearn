@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, TrendingUp, Award, Zap, Rocket, ArrowRight, CheckCircle } from 'lucide-react';
+import { Target, TrendingUp, Award, Zap, Rocket, ArrowRight, CheckCircle, Briefcase, MessageSquare, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SkillIntelligence from '../components/SkillIntelligence';
 import OpportunityFeed from '../components/OpportunityFeed';
@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { userProfile, clearData, t, matches, updateMatchStatus } = useAppContext();
+  const { userProfile, clearData, t, matches, allStartups, updateMatchStatus, setIsChatOpen } = useAppContext();
   const navigate = useNavigate();
   const [selectedOffer, setSelectedOffer] = useState(null);
 
@@ -35,11 +35,19 @@ const Dashboard = () => {
     <div className="dashboard-page animate-fade-in">
       <div className="dashboard-header">
         <div>
-          <h1 className="page-title">{t.dashboard}: {userProfile.name}</h1>
-          <p className="page-subtitle">
-            <span style={{ fontSize: '0.9rem', opacity: 0.7, marginRight: '1rem' }}>{userProfile.email}</span>
-            Your Skill Readiness Score: <span className="text-gradient" style={{ fontWeight: 800 }}>{analysisScore}%</span>
-          </p>
+          <h1 className="page-title">
+            {t.dashboard}: {userProfile.name || 'Digital Talent'}
+            {analysisScore >= 90 && (
+              <span className="verified-badge">
+                <CheckCircle size={14} /> VERIFIED TALENT
+              </span>
+            )}
+          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <p className="page-subtitle">
+              Your Skill Readiness Score: <span className="text-gradient" style={{ fontWeight: 800 }}>{analysisScore}%</span>
+            </p>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button className="btn-secondary" onClick={() => navigate('/startup-portal')}>
@@ -61,7 +69,7 @@ const Dashboard = () => {
           <Award size={48} style={{ color: getRankColor() }} />
           <div>
             <h3>Current Rank: {analysisRank}</h3>
-            <p>You are in the top {100 - analysisScore}% of digital talent in your region.</p>
+            <p>You are in the top {Math.max(1, 100 - analysisScore)}% of digital talent in your region.</p>
           </div>
         </div>
         <div className="rank-action">
@@ -69,6 +77,10 @@ const Dashboard = () => {
             <div className="job-ready-badge">
               <CheckCircle size={20} /> JOB READY
             </div>
+          ) : !userProfile.name || analysisScore === 0 ? (
+            <button className="btn-primary" onClick={() => navigate('/onboarding')}>
+              Activate AI Analyzer <ArrowRight size={16} />
+            </button>
           ) : (
             <button className="btn-primary" onClick={() => navigate('/learning')}>
               Improve Score <ArrowRight size={16} />
@@ -77,60 +89,31 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Employment Pipeline Tracks */}
-      {matches.filter(m => m.talentName === userProfile.name).map(match => (
-        <motion.div 
-          key={match._id}
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="glass-panel" 
-          style={{ 
-            marginTop: '1.5rem', 
-            background: match.status === 'Hired' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)',
-            border: `2px solid ${match.status === 'Hired' ? 'var(--success)' : 'var(--accent-primary)'}`,
-            padding: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <div style={{ background: match.status === 'Hired' ? 'var(--success)' : 'var(--accent-primary)', padding: '0.75rem', borderRadius: '50%', color: 'white' }}>
-              <Rocket size={32} />
-            </div>
-            <div>
-              <h2 style={{ margin: 0, color: match.status === 'Hired' ? 'var(--success)' : 'var(--accent-primary)' }}>
-                {match.status === 'Offered' ? 'New Industrial Proposal!' : 
-                 match.status === 'Accepted' ? 'Proposal Accepted' :
-                 match.status === 'Interview' ? 'Interview Round' : 'Hired!'}
-              </h2>
-              <p style={{ margin: '0.25rem 0 0', fontSize: '1.1rem' }}>
-                {match.status === 'Offered' && `The Admin has proposed a project at ${match.startupName} as a ${match.role}.`}
-                {match.status === 'Accepted' && `Waiting for admin to schedule your interview at ${match.startupName}.`}
-                {match.status === 'Interview' && `Prepare for your interview at ${match.startupName}. Check your email for details.`}
-                {match.status === 'Hired' && `Congratulations! You are officially hired at ${match.startupName}.`}
-              </p>
-            </div>
+      {/* Gig Management Summary */}
+      <div className="dashboard-panel glass-panel" style={{ gridColumn: 'span 2' }}>
+        <div className="panel-header">
+          <h3>Workflow Summary</h3>
+          <button className="btn-secondary" onClick={() => navigate('/gigs')}>
+             <Briefcase size={16} /> Open Workflow Hub
+          </button>
+        </div>
+        <div className="panel-content">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+             <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(59, 130, 246, 0.05)' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Active Proposals</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>{matches.filter(m => m.talentName === userProfile?.name).length}</div>
+             </div>
+             <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(16, 185, 129, 0.05)' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Hired / Active</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--success)' }}>{matches.filter(m => m.talentName === userProfile?.name && m.status === 'Hired').length}</div>
+             </div>
+             <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center', background: 'rgba(245, 158, 11, 0.05)' }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Staked Points</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--warning)' }}>2,500 SP</div>
+             </div>
           </div>
-          
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            {match.status === 'Offered' && (
-              <button 
-                className="btn-primary" 
-                style={{ padding: '0.8rem 2rem' }} 
-                onClick={() => setSelectedOffer(match)}
-              >
-                View Project Details <ArrowRight size={18} />
-              </button>
-            )}
-            {match.status === 'Hired' && (
-              <div className="job-ready-badge" style={{ padding: '0.8rem 2rem' }}>
-                <CheckCircle size={20} /> HIRED
-              </div>
-            )}
-          </div>
-        </motion.div>
-      ))}
+        </div>
+      </div>
 
       {/* Offer Details Modal */}
       {selectedOffer && (
@@ -188,11 +171,11 @@ const Dashboard = () => {
       <div className="stats-grid">
         <div className="stat-card glass-panel">
           <div className="stat-icon-wrapper blue">
-            <TrendingUp size={24} />
+            <Rocket size={24} />
           </div>
           <div className="stat-info">
-            <span className="stat-label">Market Demand</span>
-            <span className="stat-value">High</span>
+            <span className="stat-label">Active Proposals</span>
+            <span className="stat-value">{matches.filter(m => m.talentName === userProfile.name).length}</span>
           </div>
         </div>
         
@@ -201,40 +184,87 @@ const Dashboard = () => {
             <Target size={24} />
           </div>
           <div className="stat-info">
-            <span className="stat-label">Next Milestone</span>
-            <span className="stat-value">Elite Certification</span>
+            <span className="stat-label">Next Target</span>
+            <span className="stat-value">{analysisScore >= 90 ? 'Elite Pool' : '90% Elite'}</span>
           </div>
         </div>
 
         <div className="stat-card glass-panel">
           <div className="stat-icon-wrapper purple">
-            <Zap size={24} />
+            <CheckCircle size={24} />
           </div>
           <div className="stat-info">
-            <span className="stat-label">AI Insights</span>
-            <span className="stat-value">3 Paths Found</span>
+            <span className="stat-label">Profile Status</span>
+            <span className="stat-value">{analysisScore >= 90 ? 'Ready' : 'Learning'}</span>
           </div>
         </div>
       </div>
 
       <div className="dashboard-grid">
+        {/* Discover Startups (Promoted) */}
+        <div className="dashboard-panel glass-panel" style={{ border: '1px solid var(--accent-primary)', background: 'rgba(59, 130, 246, 0.03)' }}>
+          <div className="panel-header">
+            <h3>Discover Startups</h3>
+            <button className="btn-primary" onClick={() => navigate('/matchmaker')} style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+               Matchmaker
+            </button>
+          </div>
+          <div className="panel-content">
+            <div className="suggestion-card info" style={{ borderLeftColor: 'var(--accent-primary)' }}>
+              <h4>Elite Opportunities</h4>
+              <p>We've found 12 ventures seeking your {userProfile.rank} level skills. Explore them now.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Market Outlook */}
         <div className="dashboard-panel glass-panel">
           <div className="panel-header">
-            <h3>{t.learning} Recommendations</h3>
-            <button className="btn-secondary" onClick={() => navigate('/learning')}>View All</button>
+            <h3>Market Outlook</h3>
+            <button className="btn-secondary" onClick={() => navigate('/onboarding')}>Analyze</button>
           </div>
-          <div className="panel-content" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'transparent' }}>
-            {userProfile.skills && userProfile.skills.length > 0 ? (
-              <div className="suggestion-card info">
-                <h4>Dynamic Roadmap Active</h4>
-                <p>Based on your <strong>{userProfile.skills[0]?.name}</strong> skills, our ecosystem is analyzing real market opportunities for you.</p>
-              </div>
-            ) : (
-              <div className="suggestion-card warning">
-                <h4>No Skills Found</h4>
-                <p>Please complete your AI Skill Analysis to receive real industrial recommendations.</p>
-              </div>
-            )}
+          <div className="panel-content">
+            <p style={{ fontSize: '0.95rem', opacity: 0.9, fontStyle: 'italic', color: 'var(--accent-primary)' }}>
+               "{userProfile.marketAnalysis || 'Analyzing market trends...'}"
+            </p>
+          </div>
+        </div>
+
+        <div className="dashboard-panel glass-panel">
+          <div className="panel-header">
+            <h3>Gap Analysis & Roadmap</h3>
+            <button className="btn-secondary" onClick={() => navigate('/learning')}>Optimize</button>
+          </div>
+          <div className="panel-content">
+            <div className="roadmap-container">
+               <div className="roadmap-item">
+                  <div className="roadmap-status complete">
+                     <CheckCircle size={20} />
+                  </div>
+                  <div className="roadmap-info">
+                     <h4>Phase 1: Skill Discovery</h4>
+                     <p>Resume analyzed. Foundation identified.</p>
+                  </div>
+               </div>
+               <div className="roadmap-item">
+                  <div className={`roadmap-status ${analysisScore >= 90 ? 'complete' : 'active'}`}>
+                     {analysisScore >= 90 ? <CheckCircle size={20} /> : <Zap size={20} />}
+                  </div>
+                  <div className="roadmap-info">
+                     <h4>Phase 2: Elite Verification</h4>
+                     <p>{analysisScore >= 90 ? 'Target achieved.' : `Currently at ${analysisScore}%. Needs 90% for Elite status.`}</p>
+                  </div>
+               </div>
+               <div className="roadmap-item">
+                  <div className={`roadmap-status ${analysisScore >= 90 ? 'active' : 'locked'}`}>
+                     <Rocket size={20} />
+                  </div>
+                  <div className="roadmap-info">
+                     <h4>Phase 3: Startup Matching</h4>
+                     <p>Direct gateway to high-growth ventures.</p>
+                  </div>
+               </div>
+            </div>
           </div>
         </div>
 
@@ -243,14 +273,34 @@ const Dashboard = () => {
             <h3>Skill Intelligence Analytics</h3>
             <button className="btn-secondary">View Deep Dive</button>
           </div>
-          <div className="panel-content" style={{ background: 'transparent' }}>
+          <div className="panel-content">
             <SkillIntelligence />
           </div>
         </div>
-      </div>
 
-      <div className="motivational-footer" style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-secondary)' }}>
-        <p>"The only way to do great work is to love what you do." — Steve Jobs</p>
+        {/* Switch Role Panel */}
+        <div className="dashboard-panel glass-panel" onClick={handleReset} style={{ cursor: 'pointer' }}>
+          <div className="panel-header" style={{ border: 'none' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Zap className="text-warning" size={24} /> Switch Role / Home
+            </h3>
+          </div>
+          <div className="panel-content" style={{ paddingTop: 0 }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Transition between Talent and Entrepreneur modes or return home.</p>
+          </div>
+        </div>
+
+        {/* Ask Assistant Panel */}
+        <div className="dashboard-panel glass-panel" onClick={() => setIsChatOpen(true)} style={{ cursor: 'pointer' }}>
+          <div className="panel-header" style={{ border: 'none' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <MessageSquare className="text-primary" size={24} /> Ask SX Assistant
+            </h3>
+          </div>
+          <div className="panel-content" style={{ paddingTop: 0 }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Get immediate AI guidance on your career.</p>
+          </div>
+        </div>
       </div>
     </div>
   );

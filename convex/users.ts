@@ -41,6 +41,8 @@ export const syncProfile = mutation({
     skills: v.array(v.object({ name: v.string(), score: v.number() })),
     certificates: v.optional(v.array(v.string())),
     lastUpdate: v.string(),
+    marketAnalysis: v.optional(v.string()),
+    role: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -53,7 +55,19 @@ export const syncProfile = mutation({
     }
 
     if (!args.email) {
-      throw new Error("Email is required for unauthenticated sync");
+      // Create/Update based on name if email not provided (for guest mode compatibility)
+      const existingByName = await ctx.db
+        .query("users")
+        .filter((q) => q.eq(q.field("name"), args.name))
+        .first();
+      
+      if (existingByName) {
+        await ctx.db.patch(existingByName._id, { ...args, isElite });
+        return existingByName._id;
+      }
+      
+      // @ts-ignore
+      return await ctx.db.insert("users", { ...args, isElite });
     }
 
     const existing = await ctx.db

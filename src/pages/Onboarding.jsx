@@ -225,6 +225,13 @@ const Onboarding = () => {
               ))}
             </div>
 
+            <div className="glass-panel" style={{ padding: '1.25rem', marginBottom: '1.5rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', textAlign: 'left' }}>
+               <h4 style={{ color: 'var(--accent-primary)', marginBottom: '0.5rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Rocket size={16} /> 2026 AI Market Analysis
+               </h4>
+               <p style={{ fontSize: '0.85rem', lineHeight: 1.5, opacity: 0.9 }}>{analysis.marketAnalysis}</p>
+            </div>
+
             <div className="recommendation-card">
               {analysis.score >= 90 ? (
                 <div className="status-box success">

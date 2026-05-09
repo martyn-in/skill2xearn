@@ -53,14 +53,14 @@ const SkillIntelligence = () => {
   }));
 
   return (
-    <div className="skill-pulse-wrapper" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) 1fr', gap: '2rem', minHeight: '400px' }}>
-      <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ marginBottom: '1rem' }}>
+    <div className="skill-pulse-wrapper">
+      <div className="glass-panel skill-chart-panel">
+        <div className="chart-header">
           <h4 style={{ margin: 0 }}>Strict AI Benchmarking (2024-2026)</h4>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Comparing {userProfile.name}'s profile against Global AI Standards</p>
         </div>
         
-        <div style={{ flex: 1, padding: '1rem', minHeight: '350px', position: 'relative' }}>
+        <div className="chart-container">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={trendData}>
               <PolarGrid stroke="var(--glass-border)" gridType="circle" />
@@ -102,7 +102,7 @@ const SkillIntelligence = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="chart-legend" style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', fontSize: '0.75rem', marginTop: '1rem' }}>
+        <div className="chart-legend">
            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div style={{ width: '12px', height: '12px', background: 'var(--accent-primary)', borderRadius: '2px' }}></div>
               <span>Current Capability</span>
@@ -114,29 +114,37 @@ const SkillIntelligence = () => {
         </div>
       </div>
 
-      <div className="analysis-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="analysis-sidebar">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h4 style={{ margin: 0 }}>Knowledge Analysis</h4>
           <span style={{ fontSize: '0.65rem', background: 'var(--danger)', color: 'var(--text-primary)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>Strict Mode</span>
         </div>
         
         {aiGaps.map((gap, i) => (
-          <div key={i} className="glass-panel" style={{ padding: '1rem', borderLeft: i === 0 ? '4px solid var(--accent-primary)' : '1px solid var(--glass-border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+          <div key={i} className="glass-panel gap-card" style={{ borderLeft: i === 0 ? '4px solid var(--accent-primary)' : '1px solid var(--glass-border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
               <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{gap.title}</span>
               <span style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', background: 'var(--bg-color-secondary)', borderRadius: '4px', color: 'var(--accent-primary)' }}>{gap.level}</span>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>{gap.description}</p>
+            <button 
+              className="btn-secondary" 
+              style={{ padding: '0.4rem', fontSize: '0.75rem', width: 'fit-content' }}
+              onClick={() => alert(`Starting Micro-Assessment for ${gap.title}... System is initializing AI Proctor.`)}
+            >
+               Verify Skill via AI
+            </button>
           </div>
         ))}
         
-        <div style={{ marginTop: 'auto', padding: '1rem', borderRadius: 'var(--radius-md)', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1))', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+        <div className="strict-guidance-box">
            <p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--accent-secondary)' }}>Strict Guidance:</p>
            <p style={{ fontSize: '0.8rem', margin: 0 }}>To bridge the gap between your **{topSkill.name}** and the 2026 market, focus on **{aiGaps[0].title}**. General knowledge is no longer sufficient.</p>
         </div>
       </div>
     </div>
   );
-};
+}
+;
 
 export default SkillIntelligence;

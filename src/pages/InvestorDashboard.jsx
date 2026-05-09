@@ -17,11 +17,10 @@ let _failedAttempts = 0;
 let _lockedUntil = 0;
 
 const InvestorDashboard = () => {
-  const { allStartups, allUsers, updateStartupStatus, removeStartup, removeAllStartups, removeUser, removeAllUsers, shortlistPool, createMatch, updateMatchStatus, matches, t } = useAppContext();
-
+  const { allStartups, allUsers, updateStartupStatus, removeStartup, removeAllStartups, removeUser, removeAllUsers, shortlistPool, createMatch, updateMatchStatus, matches, userProfile, t } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const isAdminView = location.pathname === '/admin';
+  const isAdminView = userProfile?.role === 'admin';
 
   const [accessKey, setAccessKey]     = React.useState('');
   const [fundingInputs, setFundingInputs] = React.useState({});
@@ -454,66 +453,54 @@ const InvestorDashboard = () => {
               </div>
 
               <div className="startup-actions" style={{ textAlign: 'right' }}>
-                {startup.status === 'Pending Review' ? (
-                  isAdminView ? (
-                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <button
-                        className="btn-secondary"
-                        style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--glass-border)', color: 'var(--danger)' }}
-                        onClick={() => handleDelete(startup._id || startup.id)}
-                      >
-                        <Trash2 size={16} /> Delete
-                      </button>
-                      <button
-                        className="btn-secondary"
-                        style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
-                        onClick={() => handleAction(startup._id, 'Rejected By Investor')}
-                      >
-                        <XCircle size={18} /> Reject
-                      </button>
-                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <div style={{ position: 'relative' }}>
-                          <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>₹</span>
-                          <input 
-                            type="number"
-                            placeholder="Amount..."
-                            value={fundingInputs[startup._id] || ''}
-                            onChange={(e) => handleFundChange(startup._id, e.target.value)}
-                            style={{ 
-                              padding: '0.5rem 0.5rem 0.5rem 1.5rem', 
-                              width: '120px', 
-                              borderRadius: '6px', 
-                              border: '1px solid var(--glass-border)',
-                              background: 'var(--bg-color-secondary)',
-                              color: 'var(--text-primary)',
-                              outline: 'none'
-                            }}
-                          />
-                        </div>
+                {isAdminView ? (
+                  /* Admin Actions (Already existing) */
+                  <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {startup.status === 'Pending Review' ? (
+                      <>
                         <button
-                          className="btn-primary"
-                          onClick={() => handleAction(startup._id, 'Funded', parseInt(fundingInputs[startup._id]) || 500000)}
+                          className="btn-secondary"
+                          style={{ padding: '0.4rem 0.8rem', border: '1px solid var(--glass-border)', color: 'var(--danger)' }}
+                          onClick={() => handleDelete(startup._id || startup.id)}
                         >
-                          <DollarSign size={18} /> {startup.isHiring ? 'Approve & Match' : 'Fund'}
+                          <Trash2 size={16} /> Delete
                         </button>
                         <button
                           className="btn-secondary"
-                          style={{ borderColor: 'var(--warning)', color: 'var(--warning)' }}
-                          onClick={() => handleAction(startup._id, 'Paused')}
+                          style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
+                          onClick={() => handleAction(startup._id, 'Rejected By Investor')}
                         >
-                          Pause
+                          <XCircle size={18} /> Reject
                         </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <span className="status-badge default" style={{ fontSize: '0.8rem', opacity: 0.8 }}>
-                      <TrendingUp size={14} /> AWAITING ADMIN REVIEW
-                    </span>
-                  )
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      {isAdminView && (
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <div style={{ position: 'relative' }}>
+                            <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>₹</span>
+                            <input 
+                              type="number"
+                              placeholder="Amount..."
+                              value={fundingInputs[startup._id] || ''}
+                              onChange={(e) => handleFundChange(startup._id, e.target.value)}
+                              style={{ 
+                                padding: '0.5rem 0.5rem 0.5rem 1.5rem', 
+                                width: '120px', 
+                                borderRadius: '6px', 
+                                border: '1px solid var(--glass-border)',
+                                background: 'var(--bg-color-secondary)',
+                                color: 'var(--text-primary)',
+                                outline: 'none'
+                              }}
+                            />
+                          </div>
+                          <button
+                            className="btn-primary"
+                            onClick={() => handleAction(startup._id, 'Funded', parseInt(fundingInputs[startup._id]) || 500000)}
+                          >
+                            <DollarSign size={18} /> {startup.isHiring ? 'Approve & Match' : 'Fund'}
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                            {startup.status === 'Paused' ? (
                              <button
@@ -532,21 +519,37 @@ const InvestorDashboard = () => {
                                Pause
                              </button>
                            )}
-                           <button
-                             className="btn-secondary"
-                             style={{ padding: '0.2rem 0.6rem', fontSize: '0.7rem', border: '1px solid rgba(239, 68, 68, 0.2)', color: 'var(--danger)' }}
-                             onClick={() => handleDelete(startup._id || startup.id)}
-                             title="Delete Startup"
-                           >
-                             <Trash2 size={13} /> Delete
-                           </button>
                         </div>
-                      )}
-                      <span className={`status-badge ${startup.status === 'Funded' ? 'safe' : 'risky'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 700 }}>
-                        {startup.status === 'Funded' ? <ShieldCheck size={14} /> : <XCircle size={14} />}
-                        {startup.status.toUpperCase()}
+                        <span className={`status-badge ${startup.status === 'Funded' ? 'safe' : 'risky'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.8rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 700 }}>
+                          {startup.status === 'Funded' ? <ShieldCheck size={14} /> : <XCircle size={14} />}
+                          {startup.status.toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* User/Job Seeker Actions */
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '1rem' }}>
+                    {startup.isHiring ? (
+                      <button 
+                        className="btn-primary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                        onClick={async () => {
+                          try {
+                            await createApplication(startup.title, startup.hiringRole);
+                            alert(`Application submitted to ${startup.title}! Awaiting admin permission.`);
+                          } catch (err) {
+                            alert(err.message);
+                          }
+                        }}
+                      >
+                        <Briefcase size={18} /> Apply for {startup.hiringRole}
+                      </button>
+                    ) : (
+                      <span className="status-badge safe" style={{ fontSize: '0.8rem', opacity: 0.9 }}>
+                        <ShieldCheck size={14} /> {startup.status === 'Funded' ? 'ELITE FUNDED' : 'VALUATED'}
                       </span>
-                    </div>
+                    )}
                     {startup.investment > 0 && <span style={{ fontSize: '0.9rem', fontWeight: 700 }}>₹{startup.investment.toLocaleString()}</span>}
                   </div>
                 )}
@@ -619,21 +622,12 @@ const InvestorDashboard = () => {
                       Match & Send Project
                     </button>
                     
-                    {/* Active Match Tracking */}
-                    {matches.filter(m => m.talentName === user.name).map(m => (
-                      <div key={m._id} style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', fontSize: '0.75rem' }}>
-                         <div style={{ fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '0.25rem' }}>Active Flow: {m.status}</div>
-                         <div>Startup: {m.startupName}</div>
-                         <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.5rem' }}>
-                            {m.status === 'Accepted' && (
-                              <button onClick={() => handleUpdateMatch(m._id, 'Interview')} style={{ background: 'var(--success)', border: 'none', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '3px', cursor: 'pointer' }}>Set Interview</button>
-                            )}
-                            {m.status === 'Interview' && (
-                              <button onClick={() => handleUpdateMatch(m._id, 'Hired')} style={{ background: 'var(--accent-secondary)', border: 'none', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '3px', cursor: 'pointer' }}>Confirm Hire</button>
-                            )}
-                         </div>
+                    {/* Simplified Status Badge */}
+                    {matches.filter(m => m.talentName === user.name).length > 0 && (
+                      <div style={{ marginTop: '1rem', padding: '0.5rem 0.75rem', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-primary)', textAlign: 'center' }}>
+                         {matches.filter(m => m.talentName === user.name)[0].status.toUpperCase()} @ {matches.filter(m => m.talentName === user.name)[0].startupName}
                       </div>
-                    ))}
+                    )}
                   </motion.div>
                 ))
               )}
@@ -699,11 +693,6 @@ const InvestorDashboard = () => {
         </div>
       )}
 
-      <div style={{ marginTop: '3rem', textAlign: 'center' }}>
-        <button className="btn-secondary" onClick={() => navigate('/dashboard')}>
-          <ArrowRight size={18} style={{ transform: 'rotate(180deg)' }} /> Back to Dashboard
-        </button>
-      </div>
     </div>
   );
 };

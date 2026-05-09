@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Award, Settings, Save, CheckCircle, LogOut, Eye, Edit2, Trash2, Download } from 'lucide-react';
+import { X, User, Award, Settings, Save, CheckCircle, LogOut, Eye, Edit2, Trash2, Download, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useAppContext } from '../context/AppContext';
@@ -11,7 +11,7 @@ const ProfileModal = () => {
   const { signOut } = useAuthActions();
 
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('settings');
+    const [activeTab, setActiveTab] = useState('passport');
   const [editName, setEditName] = useState(userProfile?.name || '');
   const [saved, setSaved] = useState(false);
   const [editingCertId, setEditingCertId] = useState(null);
@@ -79,16 +79,25 @@ const ProfileModal = () => {
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={e => e.stopPropagation()}
           >
-            <button className="close-btn" onClick={() => setIsProfileOpen(false)}>
-              <X size={24} />
-            </button>
+            <div className="profile-header">
+              <div className="profile-avatar-large">
+                <User size={32} />
+              </div>
+              <div className="profile-header-info">
+                <h2>Talent Profile</h2>
+                <p>{userProfile.email || 'Verified Member'}</p>
+              </div>
+              <button className="close-btn" onClick={() => setIsProfileOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
 
             <div className="modal-tabs">
-              <button 
-                className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
-                onClick={() => setActiveTab('settings')}
+               <button 
+                className={`tab-btn ${activeTab === 'passport' ? 'active' : ''}`}
+                onClick={() => setActiveTab('passport')}
               >
-                <Settings size={18} /> Settings
+                <Download size={18} /> Passport
               </button>
               <button 
                 className={`tab-btn ${activeTab === 'certificates' ? 'active' : ''}`}
@@ -96,33 +105,110 @@ const ProfileModal = () => {
               >
                 <Award size={18} /> Certificates
               </button>
+              <button 
+                className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
+                onClick={() => setActiveTab('settings')}
+              >
+                <Settings size={18} /> Settings
+              </button>
             </div>
 
             <div className="tab-content">
+               {activeTab === 'passport' && (
+                  <div className="passport-content animate-fade-in">
+                     <div className="passport-container">
+                        <div className="elite-passport-card">
+                           <div className="passport-glare"></div>
+                           <div className="passport-header">
+                              <h3>SKILL2EARN X PASSPORT</h3>
+                              <ShieldCheck size={20} color="var(--accent-primary)" />
+                           </div>
+                           <div className="passport-body">
+                              <div className="passport-photo">
+                                 <User size={48} />
+                              </div>
+                              <div className="passport-details">
+                                 <div className="detail-item">
+                                    <span className="detail-label">Name</span>
+                                    <span className="detail-value">{userProfile.name}</span>
+                                 </div>
+                                 <div style={{ display: 'flex', gap: '2rem' }}>
+                                    <div className="detail-item">
+                                       <span className="detail-label">Status</span>
+                                       <span className="detail-value" style={{ color: userProfile.score >= 90 ? 'var(--success)' : 'var(--accent-primary)' }}>
+                                          {userProfile.score >= 90 ? 'ELITE' : 'ACTIVE'}
+                                       </span>
+                                    </div>
+                                    <div className="detail-item">
+                                       <span className="detail-label">Score</span>
+                                       <span className="detail-value">{userProfile.score}%</span>
+                                    </div>
+                                 </div>
+                                 <div className="detail-item">
+                                    <span className="detail-label">Specialization</span>
+                                    <span className="detail-value">{userProfile.rank}</span>
+                                 </div>
+                              </div>
+                           </div>
+                           <div className="passport-footer">
+                              <div className="verified-seal">
+                                 <CheckCircle size={16} /> SYSTEM VERIFIED
+                              </div>
+                              <div className="id-number">S2EX-{Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
+                           </div>
+                        </div>
+                        <button className="btn-primary" style={{ width: '100%' }} onClick={() => alert("Generating high-resolution passport image for download...")}>
+                           <Download size={18} /> Download Passport
+                        </button>
+                     </div>
+                  </div>
+               )}
+
               {activeTab === 'settings' && (
-                <div className="settings-content" style={{ textAlign: 'left' }}>
-                  <h3 style={{ textAlign: 'left' }}>Edit Profile</h3>
-                  <div className="input-group">
-                    <label>Full Name</label>
-                    <div className="input-with-icon">
-                      <User size={18} />
-                      <input 
-                        type="text" 
-                        value={editName} 
-                        onChange={(e) => setEditName(e.target.value)}
-                        placeholder="Enter your name"
-                      />
+                <div className="settings-content">
+                  <div className="settings-grid">
+                    <div className="input-group">
+                      <label>Profile Name</label>
+                      <div className="input-with-icon">
+                        <User size={18} />
+                        <input 
+                          type="text" 
+                          value={editName} 
+                          onChange={(e) => setEditName(e.target.value)}
+                          placeholder="Full Name"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="input-group">
+                      <label>Email Address</label>
+                      <div className="input-with-icon">
+                        <Settings size={18} />
+                        <input 
+                          type="text" 
+                          value={userProfile.email || 'N/A'} 
+                          disabled
+                          style={{ opacity: 0.6, cursor: 'not-allowed' }}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <button className="btn-primary" onClick={handleSave} style={{ width: '100%', marginTop: '2rem' }}>
-                    {saved ? <><CheckCircle size={18} /> Changes Saved</> : <><Save size={18} /> Save Settings</>}
-                  </button>
+                  <div className="settings-actions">
+                    <button className="btn-primary" onClick={handleSave} style={{ width: '100%' }}>
+                      {saved ? <><CheckCircle size={18} /> Changes Saved</> : <><Save size={18} /> Update Profile</>}
+                    </button>
 
-                  <button className="btn-secondary" onClick={() => { signOut(); clearData(); setIsProfileOpen(false); navigate('/'); }} style={{ width: '100%', marginTop: '1rem', borderColor: 'var(--danger)', color: 'var(--danger)' }}>
-                    <LogOut size={18} /> Logout and Reset
-                  </button>
-
+                    <div className="action-row">
+                      <button 
+                        className="btn-secondary" 
+                        onClick={() => { signOut(); clearData(); setIsProfileOpen(false); navigate('/'); }} 
+                        style={{ flex: 1, borderColor: 'rgba(239, 68, 68, 0.3)', color: 'var(--danger)', fontSize: '0.85rem' }}
+                      >
+                        <LogOut size={16} /> Logout Session
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -193,6 +279,7 @@ const ProfileModal = () => {
                 </div>
               )}
             </div>
+
           </motion.div>
         </div>
       )}

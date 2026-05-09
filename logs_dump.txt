@@ -1,0 +1,14 @@
+5/2/2026, 5:50:49 PM [CONVEX A(testEmail:test)] [LOG] '\n\n======================================================'
+5/2/2026, 5:50:49 PM [CONVEX A(testEmail:test)] [LOG] '🔐 SKILL2EARN OTP CODE FOR test@example.com: 275607'
+5/2/2026, 5:50:49 PM [CONVEX A(testEmail:test)] [LOG] '======================================================\n\n'
+5/2/2026, 5:58:15 PM [CONVEX A(testEmail:test)] [ERROR] 'Brevo API Error:' '{"message":"We have detected you are using an unrecognised IP address 2600:1f10:4a09:7c01:6748:ac5:57a1:823. If you performed this action make sure to add the new IP address in this link: https://app.brevo.com/security/authorised_ips","code":"unauthorized"}\n'
+5/2/2026, 5:58:15 PM [CONVEX A(testEmail:test)] [LOG] '\n🔐 FALLBACK OTP FOR test@example.com: 477832\n'
+5/2/2026, 6:11:49 PM [CONVEX M(_auth:signIn)] Could not find public function for '_auth:signIn'. Did you forget to run `npx convex dev`?
+
+5/2/2026, 6:12:03 PM [CONVEX M(_auth:signIn)] Could not find public function for '_auth:signIn'. Did you forget to run `npx convex dev`?
+
+5/2/2026, 6:12:23 PM [CONVEX M(auth:signIn)] Trying to execute auth.js:signIn as Mutation, but it is defined as Action.
+
+5/2/2026, 6:12:44 PM [CONVEX M(auth:signIn)] Trying to execute auth.js:signIn as Mutation, but it is defined as Action.
+
+5/2/2026, 6:13:10 PM [CONVEX M(auth:store)] [INFO] '`auth:store` type: createVerificationCode'

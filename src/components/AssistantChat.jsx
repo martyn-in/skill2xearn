@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Bot, User, Sparkles } from 'lucide-react';
+import { X, Send, Bot, User, Sparkles, Zap, Loader2 } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import './AssistantChat.css';
 
 const AssistantChat = () => {
-  const { isChatOpen, setIsChatOpen, t } = useAppContext();
-  const [input, setInput] = useState('');
+  const { isChatOpen, setIsChatOpen, userProfile, startupProfile } = useAppContext();
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hello! I am your SX AI Assistant. How can I help you navigate the Skill2Earn ecosystem today?' }
+    { role: 'ai', content: "Welcome to the Skill2Earn Intelligence Hub. I'm here to provide real-time career guidance and ecosystem insights. What's on your mind?" }
   ]);
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -17,32 +18,41 @@ const AssistantChat = () => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (isChatOpen) scrollToBottom();
+  }, [messages, isChatOpen, isTyping]);
 
-  const handleSend = () => {
+  const generateResponse = (text) => {
+    const query = text.toLowerCase();
+    
+    if (query.includes('hello') || query.includes('hi')) return "Greetings! I'm your autonomous assistant. How can I help you grow today?";
+    if (query.includes('score') || query.includes('rank')) {
+      return `Your skill score is ${userProfile?.score || 0}. To reach the next level, I recommend focusing on the 'Generative AI Foundations' course in the Learning Hub.`;
+    }
+    if (query.includes('startup')) return "Our ecosystem supports founders with feasibility analysis and investor matching. You can submit your pitch in the Entrepreneur portal.";
+    if (query.includes('job') || query.includes('work')) return "Check the Opportunity Feed. We match Elite talent with top startups based on skill intelligence scores.";
+    
+    const fallbacks = [
+      "That's an insightful question. From a strategic perspective, leveraging AI tools can significantly boost your output in that area.",
+      "I'm analyzing that based on current market trends. The Skill2Earn network is seeing a high demand for precisely what you're asking about.",
+      "Great question. I'd recommend exploring our Market Pulse dashboard to see how those trends are evolving in real-time.",
+      "I'm here to help with any part of the platform. Whether it's refining your pitch or finding the right skills to learn next, just ask!"
+    ];
+    return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+  };
+
+  const handleSend = (e) => {
+    e.preventDefault();
     if (!input.trim()) return;
 
-    const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
+    const userMsg = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMsg]);
     setInput('');
+    setIsTyping(true);
 
-    // Simulated AI response logic
     setTimeout(() => {
-      let response = "I'm still learning about that! Try asking about 'investors', 'startups', or 'how to improve my score'.";
-      const query = input.toLowerCase();
-
-      if (query.includes('investor')) {
-        response = "The Investor Radar shows startups that have been officially funded. You can find it in the sidebar!";
-      } else if (query.includes('startup') || query.includes('found')) {
-        response = "Founders can pitch their ideas in the Entrepreneur Portal. We evaluate them from Level 1 to 3.";
-      } else if (query.includes('score') || query.includes('skill')) {
-        response = "You can improve your Skill Readiness Score by completing recommended learning tracks in the Learning Hub.";
-      } else if (query.includes('help') || query.includes('tour')) {
-        response = "Welcome! Skill2Earn X is an economic growth engine. You can find jobs, pitch startups, or invest in vetted talent.";
-      }
-
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      const aiResponse = { role: 'ai', content: generateResponse(input) };
+      setMessages(prev => [...prev, aiResponse]);
+      setIsTyping(false);
     }, 1000);
   };
 
@@ -74,32 +84,42 @@ const AssistantChat = () => {
               </button>
             </div>
 
-            <div className="chat-messages">
-              {messages.map((msg, i) => (
-                <div key={i} className={`message-wrapper ${msg.role}`}>
-                  <div className="message-icon">
-                    {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
+            <div className="chat-content">
+              <div className="message-list">
+                {messages.map((msg, i) => (
+                  <div key={i} className={`message-item ${msg.role}`}>
+                    <div className="message-avatar">
+                      {msg.role === 'ai' ? <Bot size={14} /> : <User size={14} />}
+                    </div>
+                    <div className="message-bubble">
+                      {msg.content}
+                    </div>
                   </div>
-                  <div className="message-content">
-                    {msg.content}
+                ))}
+                {isTyping && (
+                  <div className="message-item ai">
+                    <div className="message-avatar"><Bot size={14} /></div>
+                    <div className="message-bubble typing-bubble">
+                      <Loader2 size={12} className="animate-spin" />
+                      <span>Thinking...</span>
+                    </div>
                   </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
+                )}
+                <div ref={messagesEndRef} />
+              </div>
             </div>
 
-            <div className="chat-input-area">
+            <form className="chat-footer" onSubmit={handleSend}>
               <input 
                 type="text" 
-                placeholder="Type your message..." 
+                placeholder="Ask me anything..." 
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
               />
-              <button className="send-btn" onClick={handleSend}>
+              <button type="submit" disabled={!input.trim()}>
                 <Send size={18} />
               </button>
-            </div>
+            </form>
           </motion.div>
         </>
       )}
