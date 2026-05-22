@@ -81,6 +81,20 @@ const Sidebar = () => {
         )}
 
         <div className="sidebar-bottom">
+          {role === 'admin' && (
+            <>
+              <div className="nav-group-label">System</div>
+              <NavLink to="/admin" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
+                <Shield size={20} />
+                <span>Hiring Portal</span>
+              </NavLink>
+              <NavLink to="/investor" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
+                <Landmark size={20} />
+                <span>Investor Radar</span>
+              </NavLink>
+            </>
+          )}
+
           <div className="nav-group-label">Support</div>
           <button 
             className="nav-item" 
@@ -97,20 +111,6 @@ const Sidebar = () => {
             <MessageSquare size={20} />
             <span>Ask SX Assistant</span>
           </button>
-
-          {role === 'admin' && (
-            <>
-              <div className="nav-group-label">System</div>
-              <NavLink to="/admin" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
-                <Shield size={20} />
-                <span>Hiring Portal</span>
-              </NavLink>
-              <NavLink to="/investor" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
-                <Landmark size={20} />
-                <span>Investor Radar</span>
-              </NavLink>
-            </>
-          )}
         </div>
       </nav>
     </aside>
