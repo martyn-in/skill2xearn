@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { Landmark, Users, TrendingUp, ShieldCheck, XCircle, DollarSign, ArrowRight, Rocket, Shield, Clock, LogOut, AlertTriangle, Trash2 } from 'lucide-react';
+import { Landmark, Users, TrendingUp, ShieldCheck, XCircle, DollarSign, ArrowRight, Rocket, Shield, Clock, LogOut, AlertTriangle, Trash2, Briefcase } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // ─── Security constants ───────────────────────────────────────────────────────
@@ -17,7 +17,7 @@ let _failedAttempts = 0;
 let _lockedUntil = 0;
 
 const InvestorDashboard = () => {
-  const { allStartups, allUsers, updateStartupStatus, removeStartup, removeAllStartups, removeUser, removeAllUsers, shortlistPool, createMatch, updateMatchStatus, matches, userProfile, t } = useAppContext();
+  const { allStartups, allUsers, updateStartupStatus, removeStartup, removeAllStartups, removeUser, removeAllUsers, shortlistPool, createMatch, updateMatchStatus, matches, userProfile, t, createApplication } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
   const isAdminView = userProfile?.role === 'admin';

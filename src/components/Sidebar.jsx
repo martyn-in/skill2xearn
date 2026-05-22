@@ -34,24 +34,7 @@ const Sidebar = () => {
           <span>{t.dashboard}</span>
         </NavLink>
 
-        <div className="nav-group-label">Support</div>
-        <button 
-          className="nav-item" 
-          onClick={() => { handleSwitchRole(); handleLinkClick(); }}
-          style={{ color: 'var(--warning)' }}
-        >
-          <LogOut size={20} />
-          <span>Switch Role / Home</span>
-        </button>
-        <button 
-          className="nav-item btn-assistant" 
-          onClick={() => { setIsChatOpen(true); handleLinkClick(); }}
-        >
-          <MessageSquare size={20} />
-          <span>Ask SX Assistant</span>
-        </button>
-
-        {(!role || role === 'job_seeker' || role === 'viewer') && (
+        {(!role || role === 'job_seeker' || role === 'viewer' || role === 'founder') && (
           <>
             <div className="nav-group-label">Ecosystem</div>
             
@@ -63,9 +46,9 @@ const Sidebar = () => {
               <Compass size={20} />
               <span>Learning Roadmap</span>
             </NavLink>
-            <NavLink to="/investor" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
-              <Landmark size={20} />
-              <span>{t.investor} Radar</span>
+            <NavLink to="/startup-portal" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
+              <Rocket size={20} />
+              <span>{t.startup} Portal</span>
             </NavLink>
             <NavLink to="/matchmaker" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
               <Heart size={20} />
@@ -80,7 +63,7 @@ const Sidebar = () => {
               <span>Leaderboard</span>
             </NavLink>
             
-            <div className="nav-group-label">Intelligence</div>
+            <div className="nav-group-label">Intelligence & Capital</div>
 
             <NavLink to="/intelligence" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
               <Compass size={20} />
@@ -90,40 +73,45 @@ const Sidebar = () => {
               <TrendingUp size={20} />
               <span>Market Pulse</span>
             </NavLink>
-          </>
-        )}
-
-        {role === 'founder' && (
-          <>
-            <div className="nav-group-label">Founder Toolkit</div>
-            <NavLink to="/startup-portal" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
-              <Rocket size={20} />
-              <span>{t.startup} Portal</span>
-            </NavLink>
             <NavLink to="/investor" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
               <Landmark size={20} />
               <span>{t.investor} Radar</span>
             </NavLink>
-            <NavLink to="/market-pulse" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
-              <TrendingUp size={20} />
-              <span>Market Pulse</span>
-            </NavLink>
           </>
         )}
 
-        {role === 'admin' && (
-          <>
-            <div className="nav-group-label">System</div>
-            <NavLink to="/admin" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
-              <Shield size={20} />
-              <span>Hiring Portal</span>
-            </NavLink>
-            <NavLink to="/investor" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
-              <Landmark size={20} />
-              <span>Investor Radar</span>
-            </NavLink>
-          </>
-        )}
+        <div className="sidebar-bottom">
+          <div className="nav-group-label">Support</div>
+          <button 
+            className="nav-item" 
+            onClick={() => { handleSwitchRole(); handleLinkClick(); }}
+            style={{ color: 'var(--warning)' }}
+          >
+            <LogOut size={20} />
+            <span>Switch Role / Home</span>
+          </button>
+          <button 
+            className="nav-item btn-assistant" 
+            onClick={() => { setIsChatOpen(true); handleLinkClick(); }}
+          >
+            <MessageSquare size={20} />
+            <span>Ask SX Assistant</span>
+          </button>
+
+          {role === 'admin' && (
+            <>
+              <div className="nav-group-label">System</div>
+              <NavLink to="/admin" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
+                <Shield size={20} />
+                <span>Hiring Portal</span>
+              </NavLink>
+              <NavLink to="/investor" className={({isActive}) => isActive ? "nav-item active" : "nav-item"} onClick={handleLinkClick}>
+                <Landmark size={20} />
+                <span>Investor Radar</span>
+              </NavLink>
+            </>
+          )}
+        </div>
       </nav>
     </aside>
   );
